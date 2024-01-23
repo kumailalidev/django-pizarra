@@ -66,3 +66,12 @@ def edit(request, project_id, pk):
             "todolist": todolist,
         },
     )
+
+
+@login_required
+def delete(request, project_id, pk):
+    project = Project.objects.filter(created_by=request.user).get(pk=project_id)
+    todolist = TodoList.objects.filter(project=project).get(pk=pk)
+    todolist.delete()
+
+    return redirect(f"/projects/{project_id}/")
