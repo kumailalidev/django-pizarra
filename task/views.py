@@ -1,3 +1,28 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required
 
-# Create your views here.
+from project.models import Project
+from task.models import TodoList
+from .models import Task
+
+
+@login_required
+def add(request, project_id, todolist_id):
+    project = Project.objects.filter(created_by=request.user).get(pk=project_id)
+    todolist = TodoList.objects.filter(project=project).get(pk=todolist_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "")
+        description = request.POST.get("description", "")
+
+        task = Task.objects.create(
+            project=project,
+            todolist=todolist,
+            name=name,
+            description=description,
+            created_by=request.user,
+        )
+
+        return redirect(f"/projects/{project_id}/{todolist_id}/")
+
+    return render(request, "task/add.html")

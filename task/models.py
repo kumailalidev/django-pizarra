@@ -7,11 +7,11 @@ from project.models import Project
 from todolist.models import TodoList
 
 
-class TodoList(models.Model):
+class Task(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, related_name="tasks", on_delete=models.CASCADE)
     todolist = models.ForeignKey(
-        TodoList, related_name="task", on_delete=models.CASCADE
+        TodoList, related_name="tasks", on_delete=models.CASCADE
     )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
