@@ -123,3 +123,31 @@ def note_detail(request, project_id, pk):
             "note": note,
         },
     )
+
+
+@login_required
+def note_edit(request, project_id, pk):
+    project = Project.objects.filter(created_by=request.user).get(pk=project_id)
+    note = project.notes.get(pk=pk)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "")
+        body = request.POST.get("body", "")
+
+        if name and body:
+            note.name = name
+            note.body = body
+            note.save()
+
+            return redirect(f"/projects/{project_id}/")
+
+    return render(request, "project/edit_note.html", {"project": project, "note": note})
+
+
+@login_required
+def note_edit(request, project_id, pk):
+    project = Project.objects.filter(created_by=request.user).get(pk=project_id)
+    note = project.notes.get(pk=pk)
+    note.delete()
+
+    return redirect(f"/projects/{project_id}/")
