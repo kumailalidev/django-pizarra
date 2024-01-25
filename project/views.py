@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from .models import Project
+from .models import Project, ProjectNote
 from .forms import ProjectFileForm
 
 
@@ -64,8 +64,8 @@ def delete(request, pk):
 
 
 @login_required
-def upload_file(request, pk):
-    project = Project.objects.filter(created_by=request.user).get(pk=pk)
+def upload_file(request, project_id):
+    project = Project.objects.filter(created_by=request.user).get(pk=project_id)
 
     if request.method == "POST":
         form = ProjectFileForm(request.POST, request.FILES)
@@ -75,7 +75,7 @@ def upload_file(request, pk):
             projectfile.project = project
             projectfile.save()
 
-            return redirect(f"/projects/{pk}/")
+            return redirect(f"/projects/{project_id}/")
 
     # else
     form = ProjectFileForm()
@@ -92,3 +92,19 @@ def delete_file(request, project_id, pk):
     projectfile.delete()  # will not delete from media server
 
     return redirect(f"/projects/{project_id}/")
+
+
+@login_required
+def add_note(request, project_id):
+    project = Project.objects.filter(created_by=request.user).get(pk=project_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "")
+        body = request.POST.get("body", "")
+
+        if name and body:
+            ProjectNote.objects.create(project=project, name=name, body=body)
+
+            return redirect(f"/projects/{project_id}/")
+
+    return render(request, "project/add_note.html", {"project": project})
